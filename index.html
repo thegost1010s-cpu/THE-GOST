@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Gost Download | Ghost Downloads</title>
+<style>
+  * {margin:0;padding:0;box-sizing:border-box;}
+  html, body {height:100%; overflow-x:hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
+  body {
+    background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+  }
+  header {
+    padding:2rem;
+    text-align:center;
+    background: linear-gradient(90deg, #0f0f0f, #222);
+    box-shadow:0 2px 15px rgba(0,0,0,0.7);
+  }
+  header h1 {
+    font-size:2.2rem;
+    color:#00ffcc;
+    margin-bottom:0.5rem;
+  }
+  header p {
+    color:#aab6c6;
+  }
+  main {
+    flex:1;
+    overflow-y:auto;
+    padding:2rem;
+    display:flex;
+    flex-direction:column;
+    gap:2rem;
+  }
+  section {
+    background: rgba(20,20,30,0.9);
+    border-radius:15px;
+    padding:1.5rem;
+    box-shadow:0 10px 25px rgba(0,0,0,0.6);
+  }
+  section h2 {
+    color:#00ffcc;
+    margin-bottom:1rem;
+    font-size:1.5rem;
+    border-bottom:2px solid #00ffcc;
+    padding-bottom:0.5rem;
+  }
+  .card {
+    background:#222;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:1rem;
+    border-radius:12px;
+    margin-bottom:1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,255,204,0.5);
+  }
+  .card span {
+    font-size:1rem;
+    max-width:70%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .download-btn {
+    background:#00ffcc;
+    color:#000;
+    text-decoration:none;
+    padding:0.5rem 1rem;
+    border-radius:10px;
+    font-weight:bold;
+    transition: background 0.2s;
+  }
+  .download-btn:hover {
+    background:#00ffaa;
+  }
+  .error {
+    color: red;
+    font-weight: bold;
+    padding: 1rem;
+    text-align: center;
+  }
+  footer {
+    text-align:center;
+    padding:1rem;
+    color:#aab6c6;
+    background:#111;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>The Gost Download</h1>
+  <p>Ghost Downloads - APKs & Scripts/Files</p>
+</header>
+<main>
+  <section>
+    <h2>APK Downloads</h2>
+    <div id="apk-list"></div>
+  </section>  
+  <section>
+    <h2>Scripts & Files</h2>
+    <div id="script-list"></div>
+  </section>
+</main>
+<footer>
+  <p>&copy; 2025 The Gost Download — Make sure files are legal to distribute.</p>
+</footer>
+
+<script>
+fetch('Download/name.json')
+  .then(res => {
+    if (!res.ok) throw new Error("JSON not found");
+    return res.json();
+  })
+  .then(data => {
+    const apkList = document.getElementById('apk-list');
+    const scriptList = document.getElementById('script-list');
+
+    if ((!data.apk || data.apk.length === 0) && (!data.scripts || data.scripts.length === 0)) {
+      const msg = document.createElement('div');
+      msg.className = 'error';
+      msg.textContent = "No files in JSON.";
+      apkList.appendChild(msg);
+      scriptList.appendChild(msg.cloneNode(true));
+      return;
+    }
+
+    if (data.apk) {
+      data.apk.forEach(file => {
+        const url = `Download/APK/${file.name}`;
+        const div = document.createElement('div');
+        div.className='card';
+        div.innerHTML=`<span>${file.name}</span><a class='download-btn' href='${url}' download>Download</a>`;
+        apkList.appendChild(div);
+      });
+    }
+
+    if (data.scripts) {
+      data.scripts.forEach(file => {
+        const url = `Download/Script/${file.name}`;
+        const div = document.createElement('div');
+        div.className='card';
+        div.innerHTML=`<span>${file.name}</span><a class='download-btn' href='${url}' download>Download</a>`;
+        scriptList.appendChild(div);
+      });
+    }
+  })
+  .catch(err => {
+    const apkList = document.getElementById('apk-list');
+    const scriptList = document.getElementById('script-list');
+    const msg = document.createElement('div');
+    msg.className = 'error';
+    msg.textContent = "JSON file not found.";
+    apkList.appendChild(msg);
+    scriptList.appendChild(msg.cloneNode(true));
+    console.error(err);
+  });
+</script>
+</body>
+</html>
