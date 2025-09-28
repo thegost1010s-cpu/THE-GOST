@@ -1,6 +1,6 @@
 {
   "apk": [
-    {"name": "TheFunbird.apk"}
+    {"name": "TheFunbird.apk"},
     {"name": "FlaskPy.apk"}
   ],
   "scripts": [
