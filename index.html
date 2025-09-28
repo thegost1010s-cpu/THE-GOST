@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>The Gost Download</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
@@ -40,14 +40,48 @@
   .download-btn:hover {background:#00ffaa;}
   .error {color:red; font-weight:bold; text-align:center; padding:1rem;}
   footer {text-align:center; padding:1rem; background:#111; color:#aab6c6;}
+  /* === Overlay Login === */
+#overlay {
+position: fixed;
+inset: 0;
+background: linear-gradient(135deg,#0d0d0d,#1a1a1a);
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 99999;
+}
+#login-box {
+background: #111;
+padding: 2rem;
+border-radius: 12px;
+box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+text-align: center;
+max-width: 350px;
+width: 100%;
+}
+#login-box h2 {color:#00ffcc; margin-bottom:1rem;}
+#login-box input {
+width: 100%; padding: 0.7rem;
+border: none; border-radius: 8px;
+margin-bottom: 1rem;
+background: #222; color:#fff;
+font-size: 1rem;
+}
+#login-box button {
+background:#00ffcc; border:none; color:#000; font-weight:bold;
+padding:0.6rem 1.2rem; border-radius:8px; cursor:pointer;
+transition:0.2s;
+}
+#login-box button:hover {background:#00ffaa;}
+#login-error {color:red; margin-top:0.7rem; display:none;}
 </style>
+
 </head>
 <body>
 <header>
   <h1>The Gost Download</h1>
   <p>Ghost Downloads - APKs & Scripts/Files</p>
 </header>
-
 <main>
   <section>
     <h2>APK Downloads</h2>
@@ -58,12 +92,47 @@
     <div id="script-list"></div>
   </section>
 </main>
-
 <footer>
   <p>&copy; 2025 The Gost Download — Make sure files are legal to distribute.</p>
 </footer>
+<!-- Overlay Login -->
+<div id="overlay">
+  <div id="login-box">
+    <h2>Enter Password</h2>
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="checkPassword()">Login</button>
+    <div id="login-error">Incorrect password</div>
+  </div>
+</div>
 
 <script>
+/*
+  We store only the SHA-256 hash (hex) of the correct password here.
+  Hash of "SIRV-THE-GOST-01-0-1" (SHA-256) is:
+  40b596153a4276a31672b5709c0f9960b6bb62fb8e328c3030067c0af994a192
+*/
+const correctHashHex = '40b596153a4276a31672b5709c0f9960b6bb62fb8e328c3030067c0af994a192';
+
+/* Helper: convert ArrayBuffer to hex string */
+function bufferToHex(buffer) {
+  const bytes = new Uint8Array(buffer);
+  const hexParts = [];
+  for (let i = 0; i < bytes.length; i++) {
+    const hex = bytes[i].toString(16).padStart(2, '0');
+    hexParts.push(hex);
+  }
+  return hexParts.join('');
+}
+
+/* Compute SHA-256 of a string using Web Crypto API, return hex string */
+async function sha256Hex(message) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return bufferToHex(hashBuffer);
+}
+
+/* Load JSON and populate lists (unchanged logic) */
 fetch('Download/name.json')
   .then(res => {
     if (!res.ok) throw new Error("JSON not found");
@@ -106,6 +175,35 @@ fetch('Download/name.json')
     document.getElementById('script-list').innerHTML = `<div class="error">JSON file not found.</div>`;
     console.error(err);
   });
+
+/* === Password Check (compares SHA-256 hex) === */
+async function checkPassword() {
+  const input = document.getElementById("password").value;
+  const overlay = document.getElementById("overlay");
+  const error = document.getElementById("login-error");
+
+  try {
+    const inputHash = await sha256Hex(input);
+    if (inputHash === correctHashHex) {
+      // success
+      overlay.style.display = "none";
+      error.style.display = "none";
+      // clear password field
+      document.getElementById("password").value = '';
+    } else {
+      // wrong password
+      error.style.display = "block";
+      // optional small shake animation
+      document.getElementById('login-box').animate(
+        [{ transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }],
+        { duration: 180, iterations: 1 }
+      );
+    }
+  } catch (e) {
+    console.error('Hashing error', e);
+    error.style.display = "block";
+  }
+}
 </script>
 </body>
 </html>
