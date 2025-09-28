@@ -1,8 +1,0 @@
-{
-  "apk": [
-    {"name": "TheFunbird.apk"}
-  ],
-  "scripts": [
-    {"name": "web.py"}
-  ]
-}
